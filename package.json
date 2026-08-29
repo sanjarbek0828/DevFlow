@@ -7,13 +7,34 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "husky"
   },
   "dependencies": {
-    "react": "19.2.3",
-    "react-native": "0.87.1",
+    "@gorhom/bottom-sheet": "^5.2.14",
+    "@notifee/react-native": "^9.1.8",
+    "@op-engineering/op-sqlite": "^18.1.4",
+    "@react-native-community/datetimepicker": "^9.1.0",
     "@react-native/new-app-screen": "0.87.1",
-    "react-native-safe-area-context": "^5.5.2"
+    "@react-navigation/bottom-tabs": "^7.18.18",
+    "@react-navigation/native": "^7.3.18",
+    "@react-navigation/native-stack": "^7.18.10",
+    "@shopify/flash-list": "^2.3.2",
+    "date-fns": "^4.4.0",
+    "i18next": "^26.4.0",
+    "lucide-react-native": "^1.37.0",
+    "react": "19.2.3",
+    "react-i18next": "^17.0.12",
+    "react-native": "0.87.1",
+    "react-native-gesture-handler": "^3.2.1",
+    "react-native-get-random-values": "^2.0.0",
+    "react-native-haptic-feedback": "^3.0.0",
+    "react-native-reanimated": "^4.6.0",
+    "react-native-safe-area-context": "^5.9.1",
+    "react-native-screens": "^4.27.0",
+    "react-native-svg": "^15.15.5",
+    "uuid": "^14.0.2",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -38,5 +59,11 @@
   },
   "engines": {
     "node": ">= 22.11.0"
+  },
+  "lint-staged": {
+    "*": {
+      "ts": "eslint --fix",
+      "tsx": "eslint --fix"
+    }
   }
 }
