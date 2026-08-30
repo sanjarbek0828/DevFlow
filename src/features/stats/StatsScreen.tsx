@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '../../store';
-import Svg, { Circle, G, G } from 'react-native-svg';
+import Svg, { Circle, G } from 'react-native-svg';
 
 export default function StatsScreen() {
   const { t } = useTranslation();
@@ -22,10 +22,10 @@ export default function StatsScreen() {
   return (
     <ScrollView style={[styles.container, { paddingTop: insets.top }]}>
       <Text style={styles.header}>{t('stats')}</Text>
-      
+
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Overall Progress</Text>
-        
+
         <View style={styles.chartContainer}>
           <Svg width={160} height={160} viewBox="0 0 160 160">
             <G rotation="-90" origin="80, 80">
@@ -54,15 +54,19 @@ export default function StatsScreen() {
             <Text style={styles.percentageText}>{completionRate}%</Text>
           </View>
         </View>
-        
+
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
             <Text style={styles.statValue}>{totalTasks}</Text>
-            <Text style={styles.statLabel}>Total Tasks</Text>
+            <Text style={styles.statLabel}>Total</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={[styles.statValue, { color: '#10b981' }]}>{completedTasks}</Text>
-            <Text style={styles.statLabel}>Completed</Text>
+            <Text style={[styles.statValue, styles.statGreen]}>{completedTasks}</Text>
+            <Text style={styles.statLabel}>Done</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{totalTasks - completedTasks}</Text>
+            <Text style={styles.statLabel}>Remaining</Text>
           </View>
         </View>
       </View>
@@ -133,8 +137,11 @@ const styles = StyleSheet.create({
     color: '#1f2937',
     marginBottom: 4,
   },
+  statGreen: {
+    color: '#10b981',
+  },
   statLabel: {
     fontSize: 14,
     color: '#6b7280',
-  }
+  },
 });

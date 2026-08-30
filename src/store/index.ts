@@ -17,8 +17,8 @@ interface AppState {
   addTag: (tag: Omit<Tag, 'id'>) => Promise<void>;
 }
 
-const parseJSON = (str: string | null | undefined, fallback: any = []) => {
-  if (!str) return fallback;
+const parseJSON = (str: string | null | undefined, fallback: unknown = []) => {
+  if (!str) { return fallback; }
   try {
     return JSON.parse(str);
   } catch {
@@ -34,14 +34,14 @@ export const useStore = create<AppState>((set, get) => ({
   fetchData: async () => {
     try {
       const listsRes = await db.execute('SELECT * FROM lists ORDER BY list_order ASC');
-      let lists = (listsRes.rows || []).map((r: any) => ({ ...r, order: r.list_order }));
-      
+      let lists = (listsRes.rows || []).map((r: any) => ({ ...r, order: r.list_order })) as List[];
+
       // Ensure default list exists
       if (lists.length === 0) {
-        const defaultList = { id: 'default', name: 'Inbox', color: '#3b82f6', icon: 'inbox', order: 0 };
+        const defaultList: List = { id: 'default', name: 'Inbox', color: '#3b82f6', icon: 'inbox', order: 0 };
         await db.execute(
           'INSERT INTO lists (id, name, color, icon, list_order) VALUES (?, ?, ?, ?, ?)',
-          [defaultList.id, defaultList.name, defaultList.color, defaultList.icon, defaultList.order]
+          [defaultList.id, defaultList.name, defaultList.color, defaultList.icon, defaultList.order],
         );
         lists = [defaultList];
       }
@@ -55,7 +55,7 @@ export const useStore = create<AppState>((set, get) => ({
         isCompleted: !!r.isCompleted,
         tagIds: parseJSON(r.tagIds, []),
         subtasks: parseJSON(r.subtasks, []),
-      }));
+      })) as Task[];
 
       set({ lists, tags, tasks });
     } catch (e) {
@@ -66,7 +66,7 @@ export const useStore = create<AppState>((set, get) => ({
   addTask: async (taskData) => {
     const id = uuidv4();
     const now = new Date().toISOString();
-    
+
     const newTask: Task = {
       id,
       ...taskData,
@@ -82,10 +82,10 @@ export const useStore = create<AppState>((set, get) => ({
         [
           newTask.id, newTask.title, newTask.description, newTask.listId, JSON.stringify(newTask.tagIds),
           newTask.priority, newTask.dueDate, newTask.reminderAt, 0, null, newTask.createdAt, newTask.updatedAt,
-          JSON.stringify(newTask.subtasks), newTask.repeatRule || null
-        ]
+          JSON.stringify(newTask.subtasks), newTask.repeatRule || null,
+        ],
       );
-      set((_state) => ({ tasks: [newTask, ...state.tasks] }));
+      set((s) => ({ tasks: [newTask, ...s.tasks] }));
     } catch (e) {
       console.error('addTask error', e);
     }
@@ -93,24 +93,24 @@ export const useStore = create<AppState>((set, get) => ({
 
   updateTask: async (id, updates) => {
     const now = new Date().toISOString();
-    const state = get();
-    const existing = state.tasks.find(t => t.id === id);
-    if (!existing) return;
+    const currentState = get();
+    const existing = currentState.tasks.find(task => task.id === id);
+    if (!existing) { return; }
 
     const updatedTask = { ...existing, ...updates, updatedAt: now };
-    
+
     try {
       await db.execute(
         'UPDATE tasks SET title=?, description=?, listId=?, tagIds=?, priority=?, dueDate=?, reminderAt=?, isCompleted=?, completedAt=?, updatedAt=?, subtasks=?, repeatRule=? WHERE id=?',
         [
           updatedTask.title, updatedTask.description, updatedTask.listId, JSON.stringify(updatedTask.tagIds),
-          updatedTask.priority, updatedTask.dueDate, updatedTask.reminderAt, updatedTask.isCompleted ? 1 : 0, 
+          updatedTask.priority, updatedTask.dueDate, updatedTask.reminderAt, updatedTask.isCompleted ? 1 : 0,
           updatedTask.completedAt, updatedTask.updatedAt, JSON.stringify(updatedTask.subtasks), updatedTask.repeatRule || null,
-          id
-        ]
+          id,
+        ],
       );
-      set((_state) => ({
-        tasks: state.tasks.map(t => t.id === id ? updatedTask : t)
+      set((s) => ({
+        tasks: s.tasks.map(task => task.id === id ? updatedTask : task),
       }));
     } catch (e) {
       console.error('updateTask error', e);
@@ -120,16 +120,16 @@ export const useStore = create<AppState>((set, get) => ({
   deleteTask: async (id) => {
     try {
       await db.execute('DELETE FROM tasks WHERE id = ?', [id]);
-      set((_state) => ({ tasks: state.tasks.filter(t => t.id !== id) }));
+      set((s) => ({ tasks: s.tasks.filter((task: Task) => task.id !== id) }));
     } catch (e) {
       console.error('deleteTask error', e);
     }
   },
 
   toggleTaskStatus: async (id) => {
-    const state = get();
-    const task = state.tasks.find(t => t.id === id);
-    if (!task) return;
+    const currentState = get();
+    const task = currentState.tasks.find(t => t.id === id);
+    if (!task) { return; }
 
     const isCompleted = !task.isCompleted;
     const completedAt = isCompleted ? new Date().toISOString() : null;
@@ -137,12 +137,12 @@ export const useStore = create<AppState>((set, get) => ({
     try {
       await db.execute(
         'UPDATE tasks SET isCompleted = ?, completedAt = ? WHERE id = ?',
-        [isCompleted ? 1 : 0, completedAt, id]
+        [isCompleted ? 1 : 0, completedAt, id],
       );
-      set((_state) => ({
-        tasks: state.tasks.map(t => 
-          t.id === id ? { ...t, isCompleted, completedAt } : t
-        )
+      set((s) => ({
+        tasks: s.tasks.map(t =>
+          t.id === id ? { ...t, isCompleted, completedAt } : t,
+        ),
       }));
     } catch (e) {
       console.error('toggleTaskStatus error', e);
@@ -154,9 +154,9 @@ export const useStore = create<AppState>((set, get) => ({
     try {
       await db.execute(
         'INSERT INTO lists (id, name, color, icon, list_order) VALUES (?, ?, ?, ?, ?)',
-        [id, listData.name, listData.color, listData.icon, listData.order]
+        [id, listData.name, listData.color, listData.icon, listData.order],
       );
-      set((_state) => ({ lists: [...state.lists, { id, ...listData }] }));
+      set((s) => ({ lists: [...s.lists, { id, ...listData }] }));
     } catch (e) {
       console.error('addList error', e);
     }
@@ -167,11 +167,11 @@ export const useStore = create<AppState>((set, get) => ({
     try {
       await db.execute(
         'INSERT INTO tags (id, name, color) VALUES (?, ?, ?)',
-        [id, tagData.name, tagData.color]
+        [id, tagData.name, tagData.color],
       );
-      set((_state) => ({ tags: [...state.tags, { id, ...tagData }] }));
+      set((s) => ({ tags: [...s.tags, { id, ...tagData }] }));
     } catch (e) {
       console.error('addTag error', e);
     }
-  }
+  },
 }));

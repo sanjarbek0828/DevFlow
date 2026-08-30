@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Keyboard, Platform } from 'react-nat
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Flag, Flag } from 'lucide-react-native';
+import { Calendar, Flag } from 'lucide-react-native';
 import { format } from 'date-fns';
 import { useStore } from '../store';
 import { Priority } from '../types';
